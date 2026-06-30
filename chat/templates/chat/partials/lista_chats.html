@@ -1,0 +1,9 @@
+{% for sala in chats %}
+    <a href="#" class="list-group-item list-group-item-action"
+       hx-get="{% url 'chat_detalle' sala.id %}" 
+       hx-target="#main-chat-container">
+       Chat Cita #{{ sala.cita.id }} - {{ sala.cita.paciente.nombres }}
+    </a>
+{% empty %}
+    <div class="p-3 text-muted small">No hay chats activos.</div>
+{% endfor %}

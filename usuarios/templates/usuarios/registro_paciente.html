@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Registrar Paciente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info small">
+                        Nota: el nombre de usuario se generará automáticamente con el formato <strong>nombre1_apellido1</strong> (por ejemplo, <em>juan_perez</em>). Anótalo para usarlo al iniciar sesión.
+                    </div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small">{{ form.password.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.password_confirm.id_for_label }}">{{ form.password_confirm.label }}</label>
+                            {{ form.password_confirm }}
+                            {% if form.password_confirm.errors %}
+                                <div class="text-danger small">{{ form.password_confirm.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ form.nombres.id_for_label }}">{{ form.nombres.label }}</label>
+                                {{ form.nombres }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ form.apellidos.id_for_label }}">{{ form.apellidos.label }}</label>
+                                {{ form.apellidos }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ form.fecha_nacim.id_for_label }}">{{ form.fecha_nacim.label }}</label>
+                                {{ form.fecha_nacim }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ form.curp.id_for_label }}">{{ form.curp.label }}</label>
+                                {{ form.curp }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label" for="{{ form.calle.id_for_label }}">{{ form.calle.label }}</label>
+                                {{ form.calle }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="{{ form.num_ext.id_for_label }}">{{ form.num_ext.label }}</label>
+                                {{ form.num_ext }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="{{ form.num_int.id_for_label }}">{{ form.num_int.label }}</label>
+                                {{ form.num_int }}
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label" for="{{ form.colonia.id_for_label }}">{{ form.colonia.label }}</label>
+                                {{ form.colonia }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="{{ form.alcaldia.id_for_label }}">{{ form.alcaldia.label }}</label>
+                                {{ form.alcaldia }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="{{ form.estado_ciudad.id_for_label }}">{{ form.estado_ciudad.label }}</label>
+                                {{ form.estado_ciudad }}
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label" for="{{ form.cp.id_for_label }}">{{ form.cp.label }}</label>
+                                {{ form.cp }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Registrar paciente</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

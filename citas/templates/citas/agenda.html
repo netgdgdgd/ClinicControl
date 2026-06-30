@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Agenda de Citas</h5>
+                </div>
+                <div class="card-body">
+                    {% if citas %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha / Hora</th>
+                                        <th>Paciente</th>
+                                        <th>Médico</th>
+                                        <th>Motivo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cita in citas %}
+                                        <tr>
+                                            <td>{{ cita.fecha_hora_timestamp|date:'d/m/Y H:i' }}</td>
+                                            <td>{{ cita.paciente }}</td>
+                                            <td>{{ cita.agenda.medico }}</td>
+                                            <td>{{ cita.motivo|truncatechars:80 }}</td>
+                                            <td>{{ cita.estado }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No hay citas agendadas por el momento.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

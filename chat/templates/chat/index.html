@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <h3>Tus Conversaciones</h3>
+        <div id="lista-chats">
+            {% include 'chat/partials/lista_chats.html' %}
+        </div>
+    </div>
+
+    <div class="col-md-9" id="main-chat-container">
+        <p>Selecciona una conversación para empezar.</p>
+    </div>
+</div>
+{% endblock %}

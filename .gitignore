@@ -1,0 +1,28 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de la base de datos local (Por si usas SQLite de emergencia)
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de medios y estáticos (No se suben, se generan en producción)
+media/
+staticfiles/
+
+# Archivos de Docker que no se comparten
+.dockerignore
+!docker-compose.yml
+!Dockerfile
+
+# Basura de Sistemas Operativos e IDEs (Windows y Mac)
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

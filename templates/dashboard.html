@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Panel de control</h4>
+                </div>
+                <div class="card-body">
+                    <p>Bienvenido {{ request.user.get_full_name|default:request.user.email }}.</p>
+                    <p>Desde aquí puedes navegar a tus citas, inventario y mensajería.</p>
+                    <div class="list-group">
+                        <a href="{% url 'agendar-cita-page' %}" class="list-group-item list-group-item-action">Agendar cita</a>
+                        <a href="{% url 'inventario-home' %}" class="list-group-item list-group-item-action">Inventario</a>
+                        <a href="{% url 'chat_index' %}" class="list-group-item list-group-item-action">Chat</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
