@@ -120,9 +120,3 @@ docker-compose exec web python manage.py test usuarios --settings=ClinicControl.
 
 docker-compose exec web python manage.py changepassword <username>
 ```
-
-## Subir a GitHub
-Si subes el proyecto a GitHub:
-- Asegurate de incluir `src/`, `README.md`, `docker-compose.yml`, `Dockerfile`, `fly.toml`, `.env.example` y el codigo de la app.
-- No subas `.env`, archivos de entorno privados o dependencias locales.
-- Cualquier companero con Docker y Docker Compose puede clonar el repositorio, copiar `.env.example` a `.env` y ejecutar `docker-compose up -d --build`.
