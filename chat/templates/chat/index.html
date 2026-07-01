@@ -1,15 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row">
-    <div class="col-md-3">
-        <h3>Tus Conversaciones</h3>
+<div class="row h-100">
+    <div class="col-md-4 border-end" style="background-color: rgba(0, 0, 0, 0.02);">
+        <div class="mb-4 pb-3">
+            <h4 class="fw-700 mb-1">
+                <i class="bi bi-chat-left-dots text-primary me-2"></i>
+                Tus Conversaciones
+            </h4>
+            <small class="text-muted">Selecciona una para continuar</small>
+        </div>
         <div id="lista-chats">
             {% include 'chat/partials/lista_chats.html' %}
         </div>
     </div>
 
-    <div class="col-md-9" id="main-chat-container">
-        <p>Selecciona una conversación para empezar.</p>
+    <div class="col-md-8" id="main-chat-container">
+        <div class="p-5 text-center text-muted">
+            <i class="bi bi-chat-left text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="mt-4">Selecciona una conversación para empezar.</p>
+        </div>
     </div>
 </div>
 {% endblock %}

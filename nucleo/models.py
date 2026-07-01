@@ -16,11 +16,23 @@ class Clinica(MultiClaseAuditoriaBase):
     cp = models.CharField(max_length=10)
     hora_apertura = models.TimeField()
     hora_cierre = models.TimeField()
+    num_telefono = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = 'CLINICAS'
         verbose_name = 'Clínica'
         verbose_name_plural = 'Clínicas'
+
+    @property
+    def direccion(self):
+        """
+        Devuelve la dirección completa de la clínica en un solo string.
+        """
+        direccion = f"{self.calle} {self.num_ext}"
+        if self.num_int:
+            direccion += f", Int. {self.num_int}"
+        direccion += f", {self.colonia}, {self.alcaldia}, {self.estado_ciudad}, C.P. {self.cp}"
+        return direccion
 
     def __str__(self):
         return self.nombre
@@ -51,6 +63,13 @@ class Paciente(MultiClaseAuditoriaBase):
     nss = models.CharField(max_length=20, unique=True, null=True, blank=True)
     tipo_sangre = models.CharField(max_length=5, null=True, blank=True)
 
+    @property
+    def full_name(self):
+        """
+        Devuelve el nombre completo del usuario.
+        """
+        return f"{self.nombres} {self.apellidos}" if hasattr(self, 'nombres') and hasattr(self, 'apellidos') else self.username
+
     class Meta:
         db_table = 'PACIENTES'
         verbose_name = 'Paciente'
@@ -74,6 +93,13 @@ class Medico(MultiClaseAuditoriaBase):
     apellidos = models.CharField(max_length=150)
     num_telefono = models.CharField(max_length=20, null=True, blank=True)
     cedula_profesional = models.CharField(max_length=50, unique=True)
+
+    @property
+    def full_name(self):
+        """
+        Devuelve el nombre completo del usuario.
+        """
+        return f"{self.nombres} {self.apellidos}" if hasattr(self, 'nombres') and hasattr(self, 'apellidos') else self.username
 
     class Meta:
         db_table = 'MEDICOS'
@@ -119,11 +145,19 @@ class LaboratorioClinico(MultiClaseAuditoriaBase):
     alcaldia = models.CharField(max_length=100)
     estado_ciudad = models.CharField(max_length=100)
     cp = models.CharField(max_length=10)
+    num_telefono = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = 'LABORATORIOS_CLINICOS'
         verbose_name = 'Laboratorio Clínico'
         verbose_name_plural = 'Laboratorios Clínicos'
+
+    @property
+    def direccion(self):
+        """
+        Devuelve la dirección completa del laboratorio en un solo string.
+        """
+        return f"{self.calle} {self.num_ext}, {self.colonia}, {self.alcaldia}, {self.estado_ciudad}, C.P. {self.cp}"
 
     def __str__(self):
         return self.nombre

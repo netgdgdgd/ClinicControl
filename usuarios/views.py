@@ -1,20 +1,18 @@
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.contrib.auth import authenticate, login
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
+from django.contrib.auth import authenticate, login
+from django.shortcuts import redirect, render
 from rest_framework import status, generics, permissions
+from django.contrib import messages
 from .serializers import RegistroPacienteSerializer, RegistroMedicoSerializer, UsuarioReadSerializer
 from .models import CustomUser
 from .forms import RegistroPacienteForm, RegistroMedicoForm
 
-
 def inicio_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    return redirect('registro-paciente-web')
-
+    return redirect('login')
 
 def registro_paciente_web(request):
     if request.user.is_authenticated:
@@ -37,7 +35,6 @@ def registro_paciente_web(request):
         form = RegistroPacienteForm()
 
     return render(request, 'usuarios/registro_paciente.html', {'form': form})
-
 
 def registro_medico_web(request):
     if request.user.is_authenticated:
@@ -64,7 +61,11 @@ class RegistroPacienteView(APIView):
     """
     Endpoint para el autoregistro de Pacientes en la plataforma.
     Genera automáticamente las credenciales de Usuario asociadas con el formato 'nombre1_apellido1'.
+    Acceso público para permitir el registro de nuevos pacientes.
     """
+    permission_classes = [permissions.AllowAny]
+    http_method_names = ['post', 'options']
+    
     @extend_schema(
         request=RegistroPacienteSerializer,
         responses={201: RegistroPacienteSerializer},
@@ -87,7 +88,11 @@ class RegistroMedicoView(APIView):
     """
     Endpoint para dar de alta al personal Médico en el sistema.
     Genera credenciales y enlaza la cédula profesional de forma segura.
+    Acceso público para permitir el registro de nuevos médicos.
     """
+    permission_classes = [permissions.AllowAny]
+    http_method_names = ['post', 'options']
+    
     @extend_schema(
         request=RegistroMedicoSerializer,
         responses={201: RegistroMedicoSerializer},

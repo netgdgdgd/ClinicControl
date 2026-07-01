@@ -5,12 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ClinicControl Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { display: flex; min-height: 100vh; }
-        #sidebar { min-width: 250px; max-width: 250px; background: #343a40; color: white; }
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Estilos para desktop */
+        @media (min-width: 768px) {
+            body { flex-direction: row; }
+            #sidebar { display: flex !important; }
+            #topbar { display: none !important; }
+        }
+        
+        /* Estilos para mobile */
+        @media (max-width: 767px) {
+            body { flex-direction: column; }
+            #sidebar { display: none !important; }
+            #topbar { display: block !important; }
+        }
+        
+        #sidebar { 
+            min-width: 250px; 
+            max-width: 250px; 
+            background: #343a40; 
+            color: white; 
+            flex-shrink: 0;
+        }
         #sidebar .nav-link { color: #adb5bd; }
         #sidebar .nav-link.active { color: white; background: #0d6efd; }
         .content { flex-grow: 1; padding: 20px; }
+        
+        #topbar {
+            background: #343a40;
+            color: white;
+            padding: 1rem;
+            border-bottom: 1px solid #495057;
+        }
+        
+        #topbar .navbar-brand {
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+        
+        #topbar .btn-toggle {
+            color: #adb5bd;
+            border-color: #495057;
+        }
+        
+        .offcanvas {
+            width: 100% !important;
+        }
+        
+        .offcanvas-header {
+            background: #343a40;
+            color: white;
+            border-bottom: 1px solid #495057;
+        }
+        
+        .offcanvas-body {
+            background: #343a40;
+            padding: 0;
+        }
+        
+        .offcanvas-body .nav-link {
+            color: #adb5bd;
+            padding: 0.75rem 1rem;
+        }
+        
+        .offcanvas-body .nav-link.active {
+            color: white;
+            background: #0d6efd;
+        }
+        
+        .offcanvas-body hr {
+            border-color: #495057;
+            margin: 0.5rem 0;
+        }
 
         /* Forzar color de texto y caret en inputs para evitar cursor/texto blanco */
         input.form-control, textarea.form-control, select.form-control {
@@ -28,17 +97,39 @@
 </head>
 <body>
 
-    <nav id="sidebar" class="p-3">
-        <h4>ClinicControl</h4>
+    <!-- Topbar para Mobile -->
+    <nav id="topbar" class="navbar navbar-dark d-md-none">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">ClinicControl</a>
+            <button class="btn btn-toggle border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                <i class="bi bi-list" style="font-size: 1.5rem; color: #adb5bd;"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar Desktop -->
+    <nav id="sidebar" class="p-3 d-none d-md-flex flex-column">
+        <h4>
+            <a href="{% url 'dashboard' %}" class="text-decoration-none link-dark text-white">ClinicControl</a>
+        </h4>
         <hr>
         {% if user.is_authenticated %}
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Inicio</a></li>
-                <li><a href="{% url 'logout' %}" class="nav-link text-danger">Cerrar Sesión</a></li>
-                <li><a href="{% url 'agendar-cita-page' %}" class="nav-link">Nueva Cita</a></li>
+                {% if user.is_medico %}
+                    <li><a href="{% url 'agendar-cita-page' %}" class="nav-link">Nueva Cita</a></li>
+                {% endif %}
                 <li><a href="{% url 'agenda-medica' %}" class="nav-link">Agenda</a></li>
-                <li><a href="{% url 'inventario-home' %}" class="nav-link">Farmacia e Inventario</a></li>
+                <li><a href="{% url 'catalogo-farmacias' %}" class="nav-link">Inventario</a></li>
                 <li><a href="{% url 'chat_index' %}" class="nav-link">Mensajería</a></li>
+                <hr class="text-secondary mt-3 mb-3">
+
+                <li class="nav-item"><a href="{% url 'nucleo:clinicas-list' %}" class="nav-link">Clínicas</a></li>
+                <li><a href="{% url 'nucleo:farmacias-list' %}" class="nav-link">Farmacias</a></li>
+                <li><a href="{% url 'nucleo:laboratorios-list' %}" class="nav-link">Laboratorios</a></li>
+                <hr class="text-secondary mt-3 mb-3">
+
+                <li><a href="{% url 'logout' %}" class="nav-link text-danger">Cerrar Sesión</a></li>
             </ul>
         {% else %}
             <ul class="nav nav-pills flex-column mb-3">
@@ -51,6 +142,41 @@
         {% endif %}
         <hr>
     </nav>
+
+    <!-- Sidebar Mobile (Offcanvas) -->
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">ClinicControl</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            {% if user.is_authenticated %}
+                <ul class="nav flex-column w-100">
+                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Inicio</a></li>
+                    {% if user.is_medico %}
+                        <li><a href="{% url 'agendar-cita-page' %}" class="nav-link">Nueva Cita</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'agenda-medica' %}" class="nav-link">Agenda</a></li>
+                    <li><a href="{% url 'catalogo-farmacias' %}" class="nav-link">Inventario</a></li>
+                    <li><a href="{% url 'chat_index' %}" class="nav-link">Mensajería</a></li>
+                    <hr>
+
+                    <li class="nav-item"><a href="{% url 'nucleo:clinicas-list' %}" class="nav-link">Clínicas</a></li>
+                    <li><a href="{% url 'nucleo:farmacias-list' %}" class="nav-link">Farmacias</a></li>
+                    <li><a href="{% url 'nucleo:laboratorios-list' %}" class="nav-link">Laboratorios</a></li>
+                    <hr>
+
+                    <li><a href="{% url 'logout' %}" class="nav-link text-danger">Cerrar Sesión</a></li>
+                </ul>
+            {% else %}
+                <ul class="nav flex-column w-100">
+                    <li class="nav-item"><a href="{% url 'registro-paciente-web' %}" class="nav-link">Registrar Paciente</a></li>
+                    <li class="nav-item"><a href="{% url 'registro-medico-web' %}" class="nav-link">Registrar Médico</a></li>
+                    <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+                </ul>
+            {% endif %}
+        </div>
+    </div>
 
     <main class="content">
         {% if messages %}

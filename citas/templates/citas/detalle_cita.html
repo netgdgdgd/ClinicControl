@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    {% if success %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Éxito:</strong> {{ success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+    
+    {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <!-- Información Principal de la Cita -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">Detalles de la Cita</h5>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'agenda-medica' %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Paciente:</strong> {{ cita.paciente.nombres }} {{ cita.paciente.apellidos }}</p>
+                            <p><strong>Médico:</strong> {{ cita.agenda.medico.nombres }} {{ cita.agenda.medico.apellidos }}</p>
+                            <p><strong>Fecha y Hora:</strong> {{ cita.fecha_hora_timestamp|date:'d/m/Y H:i' }}</p>
+                            <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
+                            <p>
+                                <strong>Estado:</strong>
+                                <span class="badge {% if cita.estado == 'Agendada' %}bg-success{% elif cita.estado == 'Cancelada' %}bg-danger{% elif cita.estado == 'Atendida' %}bg-info{% endif %}">
+                                    {{ cita.estado }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Información de la Clínica -->
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-hospital"></i>Ubicación de la Clínica
+                                </h6>
+                                <p class="mb-1 small">
+                                    <strong>Clínica:</strong> {{ cita.agenda.clinica.nombre }}
+                                </p>
+                                <p class="mb-1 small">
+                                    <strong>Dirección:</strong>
+                                    <br>
+                                    {{ cita.agenda.clinica.calle }} #{{ cita.agenda.clinica.num_ext }}
+                                    {% if cita.agenda.clinica.num_int %}
+                                        Apto. {{ cita.agenda.clinica.num_int }}
+                                    {% endif %}
+                                    <br>
+                                    {{ cita.agenda.clinica.colonia }}, {{ cita.agenda.clinica.alcaldia }}
+                                    <br>
+                                    {{ cita.agenda.clinica.estado_ciudad }}, CP {{ cita.agenda.clinica.cp }}
+                                </p>
+                                <p class="mb-0 small">
+                                    <strong>Horario:</strong> {{ cita.agenda.clinica.hora_apertura|time:'H:i' }} - {{ cita.agenda.clinica.hora_cierre|time:'H:i' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if es_medico %}
+        <div class="row">
+            <!-- Sección de Receta -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">Receta Médica</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if receta %}
+                            <div class="alert alert-info">
+                                <strong>Receta Creada:</strong> {{ receta.fecha_emision|date:'d/m/Y' }}
+                            </div>
+                            {% if receta.indicaciones_generales %}
+                                <p><strong>Indicaciones Generales:</strong></p>
+                                <p>{{ receta.indicaciones_generales }}</p>
+                            {% endif %}
+                        {% else %}
+                            <form method="POST" class="needs-validation">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="{{ receta_form.fecha_emision.id_for_label }}" class="form-label">
+                                        {{ receta_form.fecha_emision.label }}
+                                    </label>
+                                    {{ receta_form.fecha_emision }}
+                                    {% if receta_form.fecha_emision.errors %}
+                                        <div class="text-danger small mt-1">{{ receta_form.fecha_emision.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ receta_form.indicaciones_generales.id_for_label }}" class="form-label">
+                                        {{ receta_form.indicaciones_generales.label }}
+                                    </label>
+                                    {{ receta_form.indicaciones_generales }}
+                                    {% if receta_form.indicaciones_generales.errors %}
+                                        <div class="text-danger small mt-1">{{ receta_form.indicaciones_generales.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" name="crear_receta" class="btn btn-success w-100">
+                                    <i class="fas fa-plus"></i> Crear Receta
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Medicamentos en la Receta -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">Medicamentos en Receta</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if medicamentos_receta %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Medicamento</th>
+                                            <th>Dosis</th>
+                                            <th>Frecuencia</th>
+                                            <th>Días</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for med in medicamentos_receta %}
+                                            <tr>
+                                                <td>{{ med.medicamento.nombre_comercial|default:med.medicamento.nombre_generico }}</td>
+                                                <td>{{ med.dosis }}</td>
+                                                <td>{{ med.frecuencia }}</td>
+                                                <td>{{ med.duracion_dias }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+
+                        {% if receta %}
+                            <form method="POST" class="needs-validation">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="{{ medicamento_form.medicamento.id_for_label }}" class="form-label">
+                                        {{ medicamento_form.medicamento.label }}
+                                    </label>
+                                    {{ medicamento_form.medicamento }}
+                                    {% if medicamento_form.medicamento.errors %}
+                                        <div class="text-danger small mt-1">{{ medicamento_form.medicamento.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label for="{{ medicamento_form.dosis.id_for_label }}" class="form-label">
+                                            {{ medicamento_form.dosis.label }}
+                                        </label>
+                                        {{ medicamento_form.dosis }}
+                                        {% if medicamento_form.dosis.errors %}
+                                            <div class="text-danger small mt-1">{{ medicamento_form.dosis.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-6 mb-3">
+                                        <label for="{{ medicamento_form.frecuencia.id_for_label }}" class="form-label">
+                                            {{ medicamento_form.frecuencia.label }}
+                                        </label>
+                                        {{ medicamento_form.frecuencia }}
+                                        {% if medicamento_form.frecuencia.errors %}
+                                            <div class="text-danger small mt-1">{{ medicamento_form.frecuencia.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ medicamento_form.duracion_dias.id_for_label }}" class="form-label">
+                                        {{ medicamento_form.duracion_dias.label }}
+                                    </label>
+                                    {{ medicamento_form.duracion_dias }}
+                                    {% if medicamento_form.duracion_dias.errors %}
+                                        <div class="text-danger small mt-1">{{ medicamento_form.duracion_dias.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" name="agregar_medicamento" class="btn btn-warning w-100">
+                                    <i class="fas fa-plus"></i> Agregar Medicamento
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-secondary mb-0">
+                                Crea una receta primero para agregar medicamentos.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Padecimientos del Paciente -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0">Padecimientos del Paciente</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if padecimientos_paciente %}
+                            <div class="list-group">
+                                {% for padecimiento in padecimientos_paciente %}
+                                    <span class="badge bg-danger mb-2">
+                                        {{ padecimiento.padecimiento.nombre_padecimiento }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <hr>
+                        {% endif %}
+
+                        <form method="POST" class="needs-validation">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="{{ padecimiento_form.padecimiento.id_for_label }}" class="form-label">
+                                    {{ padecimiento_form.padecimiento.label }}
+                                </label>
+                                {{ padecimiento_form.padecimiento }}
+                                {% if padecimiento_form.padecimiento.errors %}
+                                    <div class="text-danger small mt-1">{{ padecimiento_form.padecimiento.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" name="asignar_padecimiento" class="btn btn-danger w-100">
+                                <i class="fas fa-plus"></i> Asignar Padecimiento
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Solicitudes de Estudio -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">Solicitudes de Estudio</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if solicitudes_estudio %}
+                            <div class="list-group mb-3">
+                                {% for estudio in solicitudes_estudio %}
+                                    <div class="list-group-item border-0 bg-light p-3 rounded mb-2">
+                                        <div class="d-flex w-100 justify-content-between mb-2">
+                                            <h6 class="mb-0 text-primary">
+                                                <i class="fas fa-flask"></i> {{ estudio.tipo_estudio }}
+                                            </h6>
+                                        </div>
+                                        <p class="mb-2 small">
+                                            <strong>Laboratorio:</strong> {{ estudio.laboratorio_clinico.nombre }}
+                                        </p>
+                                        <p class="mb-2 small">
+                                            <strong>Ubicación:</strong>
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.calle }} #{{ estudio.laboratorio_clinico.num_ext }}
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.colonia }}, {{ estudio.laboratorio_clinico.alcaldia }}
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.estado_ciudad }}, CP {{ estudio.laboratorio_clinico.cp }}
+                                        </p>
+                                        {% if estudio.indicaciones %}
+                                            <p class="mb-0 small">
+                                                <strong>Indicaciones:</strong> {{ estudio.indicaciones }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <hr>
+                        {% endif %}
+
+                        <form method="POST" class="needs-validation">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="{{ solicitud_estudio_form.laboratorio_clinico.id_for_label }}" class="form-label">
+                                    {{ solicitud_estudio_form.laboratorio_clinico.label }}
+                                </label>
+                                {{ solicitud_estudio_form.laboratorio_clinico }}
+                                {% if solicitud_estudio_form.laboratorio_clinico.errors %}
+                                    <div class="text-danger small mt-1">{{ solicitud_estudio_form.laboratorio_clinico.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ solicitud_estudio_form.tipo_estudio.id_for_label }}" class="form-label">
+                                    {{ solicitud_estudio_form.tipo_estudio.label }}
+                                </label>
+                                {{ solicitud_estudio_form.tipo_estudio }}
+                                {% if solicitud_estudio_form.tipo_estudio.errors %}
+                                    <div class="text-danger small mt-1">{{ solicitud_estudio_form.tipo_estudio.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ solicitud_estudio_form.indicaciones.id_for_label }}" class="form-label">
+                                    {{ solicitud_estudio_form.indicaciones.label }}
+                                </label>
+                                {{ solicitud_estudio_form.indicaciones }}
+                                {% if solicitud_estudio_form.indicaciones.errors %}
+                                    <div class="text-danger small mt-1">{{ solicitud_estudio_form.indicaciones.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" name="crear_solicitud_estudio" class="btn btn-info w-100">
+                                <i class="fas fa-plus"></i> Crear Solicitud de Estudio
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Vista para pacientes: solo mostrar información -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">Receta Médica</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if receta %}
+                            <div class="alert alert-info">
+                                <strong>Receta Creada:</strong> {{ receta.fecha_emision|date:'d/m/Y' }}
+                            </div>
+                            {% if receta.indicaciones_generales %}
+                                <p><strong>Indicaciones Generales:</strong></p>
+                                <p>{{ receta.indicaciones_generales }}</p>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-secondary mb-0">
+                                No hay receta registrada aún.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">Medicamentos en Receta</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if medicamentos_receta %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Medicamento</th>
+                                            <th>Dosis</th>
+                                            <th>Frecuencia</th>
+                                            <th>Días</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for med in medicamentos_receta %}
+                                            <tr>
+                                                <td>{{ med.medicamento.nombre_comercial|default:med.medicamento.nombre_generico }}</td>
+                                                <td>{{ med.dosis }}</td>
+                                                <td>{{ med.frecuencia }}</td>
+                                                <td>{{ med.duracion_dias }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary mb-0">
+                                No hay medicamentos prescritos.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Solicitudes de Estudio (para pacientes) -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">Solicitudes de Estudio</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if solicitudes_estudio %}
+                            <div class="list-group">
+                                {% for estudio in solicitudes_estudio %}
+                                    <div class="list-group-item border-0 bg-light p-3 rounded mb-2">
+                                        <div class="mb-2">
+                                            <h6 class="mb-0 text-primary">
+                                                <i class="fas fa-flask"></i> {{ estudio.tipo_estudio }}
+                                            </h6>
+                                        </div>
+                                        <p class="mb-2 small">
+                                            <strong>Laboratorio:</strong> {{ estudio.laboratorio_clinico.nombre }}
+                                        </p>
+                                        <p class="mb-2 small">
+                                            <strong>Ubicación:</strong>
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.calle }} #{{ estudio.laboratorio_clinico.num_ext }}
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.colonia }}, {{ estudio.laboratorio_clinico.alcaldia }}
+                                            <br>
+                                            {{ estudio.laboratorio_clinico.estado_ciudad }}, CP {{ estudio.laboratorio_clinico.cp }}
+                                        </p>
+                                        {% if estudio.indicaciones %}
+                                            <p class="mb-0 small">
+                                                <strong>Indicaciones:</strong> {{ estudio.indicaciones }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary mb-0">
+                                No hay solicitudes de estudio asignadas.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

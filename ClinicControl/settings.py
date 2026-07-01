@@ -18,20 +18,14 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
-    # Le decimos a Django que DEBUG siempre debe ser un booleano (por seguridad, default False)
     DEBUG=(bool, False)
 )
 
-# Lee el archivo .env si existe (entorno de desarrollo)
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Lee la llave secreta desde el archivo .env (Si no la encuentra, arrojará un error de seguridad, lo cual es bueno)
 SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')#
 
-# Lee el modo depuración (Será True en tu compu, y False en el servidor automáticamente)
-DEBUG = env('DEBUG')
-
-# Lee la lista de dominios permitidos (convierte el texto separado por comas en una lista de Python)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 ACTIVEMQ_HOST = env('ACTIVEMQ_HOST', default='broker_mensajeria')
 ACTIVEMQ_PORT = env('ACTIVEMQ_PORT', default=61613)
@@ -63,6 +57,15 @@ INSTALLED_APPS = [
 
 # Configuración de Django REST Framework para usar drf-spectacular
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -72,10 +75,13 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Documentación de los endpoints para el sistema de gestión clínica',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'Token': []}, {'Session': []}],
 }
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',    'whitenoise.middleware.WhiteNoiseMiddleware',    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -109,10 +115,7 @@ WSGI_APPLICATION = 'ClinicControl.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db(
-        'DATABASE_URL',
-        default='mysql://django_user:django_password@127.0.0.1:3306/clinica_db'
-    )
+    'default': env.db('DATABASE_URL')
 }
 DATABASES['default']['OPTIONS'] = {
     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -148,7 +151,7 @@ TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False  # Cambiado a False para evitar problemas con la zona horaria en México
 
 
 # Static files (CSS, JavaScript, Images)
@@ -168,6 +171,12 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-LOGIN_REDIRECT_URL = 'dashboard'  # Asegúrate de tener una ruta llamada 'dashboard'
-LOGOUT_REDIRECT_URL = 'home'     # Redirige a la página de registro al cerrar sesión
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'home'     # Redirige a la página de login al cerrar sesión
 LOGIN_URL = 'login'
+
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

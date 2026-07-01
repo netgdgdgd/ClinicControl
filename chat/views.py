@@ -5,38 +5,41 @@ from django.conf import settings
 from .models import SalaChat, Mensaje
 import stomp
 import json
+import os
 
 def publicar_mensaje_broker(sala_id, mensaje_data):
     # Conexión al broker usando configuración desde settings.py
     host = getattr(settings, 'ACTIVEMQ_HOST', 'broker_mensajeria')
     port = getattr(settings, 'ACTIVEMQ_PORT', 61613)
     conn = stomp.Connection([(host, port)])
-    conn.connect('admin', 'admin', wait=True)
+    conn.connect(os.environ.get('BROKER_USER'), os.environ.get('BROKER_PASSWORD'), wait=True)
     
     # Enviamos el mensaje al tópico de la sala
     topic = f'/topic/chat.{sala_id}'
     conn.send(body=json.dumps(mensaje_data), destination=topic)
     conn.disconnect()
 
+# @login_required
+# def chat_index(request):
+#     # Página principal de chat que carga la lista de conversaciones
+#     return render(request, 'chat/index.html')
+
 @login_required
+#def lista_chats_partial(request):
 def chat_index(request):
-    # Página principal de chat que carga la lista de conversaciones
-    return render(request, 'chat/index.html')
-
-
-@login_required
-def lista_chats_partial(request):
     """
     Retorna solo el fragmento de la lista de chats.
     """
     if request.user.is_medico:
         # Filtra chats donde el médico sea el de la cita
         chats = SalaChat.objects.filter(cita__agenda__medico__usuario=request.user)
-    else:
+        print(f"Chats para médico {request.user.username}: {chats}")  # Depuración
+    elif request.user.is_paciente:
         # Filtra chats donde el paciente sea el dueño de la cita
         chats = SalaChat.objects.filter(cita__paciente__usuario=request.user)
-
-    return render(request, 'chat/partials/lista_chats.html', {'chats': chats})
+        print(f"Chats para paciente {request.user.username}: {chats}")  # Depuración
+    print(chats.query)  # Depuración: muestra la consulta SQL generada
+    return render(request, 'chat/index.html', {'chats': chats})
 
 @login_required
 def detalle_chat_partial(request, sala_id):

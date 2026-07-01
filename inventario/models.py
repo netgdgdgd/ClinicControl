@@ -13,7 +13,6 @@ class FabricanteMedicamento(MultiClaseAuditoriaBase):
     def __str__(self):
         return self.nombre
 
-
 class Farmacia(MultiClaseAuditoriaBase):
     nombre = models.CharField(max_length=150)
     calle = models.CharField(max_length=100)
@@ -24,11 +23,19 @@ class Farmacia(MultiClaseAuditoriaBase):
     cp = models.CharField(max_length=10)
     hora_apertura = models.TimeField()
     hora_cierre = models.TimeField()
+    num_telefono = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = 'FARMACIAS'
         verbose_name = 'Farmacia'
         verbose_name_plural = 'Farmacias'
+
+    @property
+    def direccion(self):
+        """
+        Devuelve la dirección completa de la farmacia en un solo string.
+        """
+        return f"{self.calle} {self.num_ext}, {self.colonia}, {self.alcaldia}, {self.estado_ciudad}, C.P. {self.cp}"
 
     def __str__(self):
         return f"Farmacia {self.nombre} ({self.colonia})"

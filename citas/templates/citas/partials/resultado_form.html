@@ -1,0 +1,31 @@
+{% if errores %}
+    {% if errores.non_field_errors %}
+        <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+            <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
+            <div>
+                <strong>No se pudo agendar la cita:</strong>
+                <ul class="mb-0 mt-1 ps-3">
+                    {% for error in errores.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% for campo, lista_errores in errores.items %}
+        {% if campo != 'non_field_errors' %}
+            <div class="alert alert-warning mt-2 py-2">
+                <strong>{{ campo|title }}:</strong> {{ lista_errores.0 }}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+{% elif exito %}
+    <div class="alert alert-success d-flex align-items-center mt-3" role="alert">
+        <i class="fas fa-check-circle fs-4 me-3"></i>
+        <div>
+            <strong>Cita confirmada</strong> Tu cita ha sido agendada correctamente.
+        </div>
+    </div>
+{% endif %}

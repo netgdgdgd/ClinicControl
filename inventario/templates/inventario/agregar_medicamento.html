@@ -1,50 +1,176 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Agregar Nuevo Medicamento</h5>
-                </div>
-                <div class="card-body">
-                    <form hx-post="{% url 'medicamento-list' %}" 
-                          hx-target="#resultado-inventario"
-                          hx-swap="innerHTML">
-                        {% csrf_token %}
+<div class="container-fluid mt-4">
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <!-- Encabezado Principal -->
+            <div class="mb-5">
+                <h1 class="display-4 mb-2">
+                    <i class="fas fa-hospital"></i> Farmacia & Inventario
+                </h1>
+                <p class="lead text-muted">Gestiona y consulta medicamentos disponibles</p>
+            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Nombre del Medicamento</label>
-                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Paracetamol" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea name="descripcion" class="form-control" rows="2" placeholder="Ej: Analgésico y antipirético"></textarea>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Stock Inicial</label>
-                                <input type="number" name="stock" class="form-control" value="0" required>
+            <!-- Tarjetas de Opciones Principales -->
+            <div class="row g-4 mb-5">
+                <!-- Opción 1: Ver Catálogo de Medicamentos -->
+                <div class="col-md-6 col-lg-4">
+                    <a href="{% url 'catalogo-farmacias' %}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100 border-0 option-card" style="transition: all 0.3s;">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-pills text-primary" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                <h5 class="card-title">Catálogo de Medicamentos</h5>
+                                <p class="card-text text-muted small">
+                                    Explora todos los medicamentos disponibles en nuestras farmacias
+                                </p>
+                                <span class="badge bg-primary mt-2">
+                                    <i class="fas fa-arrow-right"></i> Ir al Catálogo
+                                </span>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Precio</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" step="0.01" name="precio" class="form-control" required>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Opción 2: Agregar Medicamento (solo para staff/admin) -->
+                {% if request.user.is_staff %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm h-100 border-0" style="transition: all 0.3s;">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-plus-circle text-success" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                <h5 class="card-title">Agregar Medicamento</h5>
+                                <p class="card-text text-muted small">
+                                    Registra nuevos medicamentos en el inventario
+                                </p>
+                                <button type="button" class="badge bg-success mt-2 border-0" data-bs-toggle="modal" data-bs-target="#modalAgregarMedicamento" style="cursor: pointer;">
+                                    <i class="fas fa-plus"></i> Agregar Nuevo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal para Agregar Medicamento -->
+                    <div class="modal fade" id="modalAgregarMedicamento" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-plus-circle"></i> Agregar Medicamento
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form hx-post="{% url 'medicamento-list' %}" 
+                                          hx-target="#resultado-inventario"
+                                          hx-swap="innerHTML"
+                                          hx-on::after-settle="document.getElementById('modalAgregarMedicamento').querySelector('.btn-close').click()">
+                                        {% csrf_token %}
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Nombre del Medicamento</label>
+                                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Paracetamol" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Descripción</label>
+                                            <textarea name="descripcion" class="form-control" rows="2" placeholder="Ej: Analgésico y antipirético"></textarea>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Stock Inicial</label>
+                                                <input type="number" name="stock" class="form-control" value="0" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Precio</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" name="precio" class="form-control" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-save"></i> Registrar en Inventario
+                                        </button>
+                                    </form>
+                                    
+                                    <div id="resultado-inventario" class="mt-3"></div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                {% endif %}
 
-                        <button type="submit" class="btn btn-primary w-100">Registrar en Inventario</button>
-                    </form>
-                    
-                    <div id="resultado-inventario" class="mt-3"></div>
+                <!-- Opción 3: Información General (para pacientes) -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-info-circle text-info" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                            <h5 class="card-title">Información</h5>
+                            <p class="card-text text-muted small">
+                                {% if request.user.is_paciente %}
+                                    Consulta información sobre medicamentos y encuentra las farmacias más cercanas
+                                {% elif request.user.is_medico %}
+                                    Consulta disponibilidad de medicamentos para prescripciones
+                                {% else %}
+                                    Gestiona el catálogo de medicamentos de la clínica
+                                {% endif %}
+                            </p>
+                            <span class="badge bg-info mt-2">
+                                <i class="fas fa-book"></i> Más Info
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas (opcional) -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-1">Farmacias Activas</h6>
+                            <h3 class="text-primary mb-0">
+                                <i class="fas fa-hospital-user"></i> Disponibles
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-1">Medicamentos</h6>
+                            <h3 class="text-success mb-0">
+                                <i class="fas fa-pills"></i> En Stock
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-1">Acceso</h6>
+                            <h3 class="text-info mb-0">
+                                <i class="fas fa-unlock"></i> Público
+                            </h3>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .option-card {
+        cursor: pointer;
+        border-radius: 0.75rem;
+    }
+
+    .option-card:hover {
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-4px);
+    }
+</style>
 {% endblock %}

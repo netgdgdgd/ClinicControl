@@ -1,39 +1,37 @@
 services:
   # ========================================================================
-  # SERVICIO 1: MOTOR DE BASE DE DATOS RELACIONAL (MARIADB)
+  # SERVICIO 1: MARIADB
   # ========================================================================
   db:
     image: mariadb:10.11
     container_name: mariadb_clinica
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password_secreta
-      MYSQL_DATABASE: clinica_db
-      MYSQL_USER: django_user
-      MYSQL_PASSWORD: django_password
-    ports:
-      - "3306:3306"
+    env_file:
+      - .env
+    #ports:
+    #  - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
-      # Opcional: Descomenta la siguiente línea si quieres que tus scripts SQL 
-      # se ejecuten automáticamente la primera vez que se cree el contenedor.
       # - ./db_scripts:/docker-entrypoint-initdb.d
     networks:
-      - red_clinica
+      - red_cliniccontrol
 
   # ========================================================================
-  # SERVICIO 2: BROKER DE MENSAJERÍA EN TIEMPO REAL (ACTIVEMQ)
+  # SERVICIO 2: ACTIVEMQ
   # ========================================================================
   activemq:
     image: rmohr/activemq:latest
     container_name: broker_mensajeria
     restart: always
     ports:
-      - "61613:61613" # Puerto oficial para STOMP TCP
+      #- "61613:61613" # Puerto oficial para STOMP TCP
       - "61614:61614" # Puerto para STOMP sobre WebSocket
-      - "8161:8161"   # Panel de administración web de ActiveMQ
+      #- "8161:8161"   # Panel de administración web de ActiveMQ
+    volumes:
+      - ./config/activemq/users.properties:/opt/activemq/conf/users.properties:ro
+      - ./config/activemq/groups.properties:/opt/activemq/conf/groups.properties:ro
     networks:
-      - red_clinica
+      - red_cliniccontrol
 
   # ========================================================================
   # SERVICIO 3: SERVIDOR DE APLICACIÓN WEB (DJANGO - CLINICCONTROL)
@@ -44,15 +42,13 @@ services:
     restart: always
     ports:
       - "8000:8000"
-    # Enlaza el archivo de configuración para inyectar las credenciales de forma segura
     env_file:
       - .env
-    # Garantiza el orden de encendido de la arquitectura distribuida
     depends_on:
       - db
       - activemq
     networks:
-      - red_clinica
+      - red_cliniccontrol
 
 # ==========================================================================
 # VOLÚMENES Y REDES (PERSISTENCIA Y AISLAMIENTO)
@@ -63,5 +59,5 @@ volumes:
 
 networks:
   # Aísla la comunicación interna de los contenedores por seguridad
-  red_clinica:
+  red_cliniccontrol:
     driver: bridge

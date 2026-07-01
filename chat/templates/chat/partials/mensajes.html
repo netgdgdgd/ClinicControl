@@ -6,7 +6,11 @@
         {% for mensaje in mensajes %}
             <div class="d-flex mb-3 {% if mensaje.remitente == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
                 <div class="p-2 rounded {% if mensaje.remitente == request.user %}bg-primary text-white{% else %}bg-light border{% endif %}">
-                    {{ mensaje.contenido }}
+                    {% if mensaje.remitente == request.user %}
+                        <strong>Tú:</strong> {{ mensaje.contenido }}
+                    {% else %}
+                        <strong>{{ mensaje.remitente.username }}:</strong> {{ mensaje.contenido }}
+                    {% endif %}
                     <small class="d-block {% if mensaje.remitente == request.user %}text-white-50{% else %}text-muted{% endif %}" style="font-size: 0.7em;">
                         {{ mensaje.fecha_envio|date:"H:i" }}
                     </small>
