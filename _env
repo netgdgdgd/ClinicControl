@@ -1,0 +1,40 @@
+# ==========================================
+# CONFIGURACIÓN DEL NÚCLEO DE DJANGO
+# ==========================================
+
+# Llave secreta para hashes y sesiones (Cámbiala en producción)
+SECRET_KEY=qQJCGmpYNmzJQn+iRHHbL7j3jak4cs1T
+
+# Modo depuración: Actívalo (True) en tu lap, desactívalo (False) en producción
+DEBUG=True
+
+
+# Hosts permitidos separados por comas (Sin espacios)
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,*,[::1]
+
+
+ACTIVEMQ_HOST=broker_mensajeria
+ACTIVEMQ_PORT=61613
+
+BROKER_USER=cliniccontrolmqadmin
+BROKER_PASSWORD=6o8IUYFTm7sMRFnqJDBjitPL22wUVZ/r
+
+# ==========================================
+# CONFIGURACIÓN DE BASE DE DATOS
+# ==========================================
+
+# Formato: mysql://USUARIO:PASSWORD@HOST:PUERTO/NOMBRE_BD
+DATABASE_URL=mysql://cliniccontroldbadmin:6o8IUYFTm7sMRFnqJDBjitPL22wUVZ%2Fr@db:3306/clinica_db
+
+MARIADB_ROOT_PASSWORD=tu_contraseña_root_secreta
+MARIADB_DATABASE=clinica_db
+MARIADB_USER=cliniccontroldbadmin
+MARIADB_PASSWORD=6o8IUYFTm7sMRFnqJDBjitPL22wUVZ/r
+
+# ==========================================
+# CONFIGURACIONES DE ENTORNO EXTRA (Opcional)
+# ==========================================
+
+# Aquí podrías poner en el futuro tokens de APIs externas, 
+# credenciales de Amazon S3, o variables de Fly.dev/Railway
+# API_KEY_GOOGLE_MAPS=tu_token_aqui
