@@ -1,0 +1,44 @@
+{
+    "name": "Entorno Clínico (Django + MariaDB)",
+    
+    // Le indicamos que use tu orquestación actual
+    "dockerComposeFile": "../docker-compose.yml",
+    
+    // El contenedor principal donde VS Code inyectará el servidor de desarrollo
+    "service": "web",
+    
+    // La carpeta interna de tu contenedor donde vive el código (ajusta si usas otra como /code)
+    "workspaceFolder": "/",
+
+    // Puertos que Codespaces debe abrir automáticamente al internet de forma segura
+    "forwardPorts": [
+        8000,   // Django
+        61614,  // ActiveMQ WebSockets (para tu JS/Frontend)
+        3306    // MariaDB (Opcional, útil si quieres conectar DBeaver o TablePlus en la nube)
+    ],
+
+    // Personalización del entorno de VS Code
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "editor.formatOnSave": true,
+                "files.insertFinalNewline": true
+            },
+            // Extensiones que se instalarán automáticamente en tu Codespace
+            "extensions": [
+                "ms-python.python",              // Soporte core para Python
+                "batisteo.vscode-django",        // Snippets y sintaxis para Django Templates
+                "ms-azuretools.vscode-docker",   // Gestión visual de tus contenedores
+                "formulahendry.auto-close-tag",  // Productividad en HTML
+                "humao.rest-client"              // Para probar tus APIs de Swagger sin salir del editor
+            ]
+        }
+    },
+
+    // Comando que se ejecuta una vez que el contenedor termina de construirse
+    "postCreateCommand": "python manage.py migrate",
+
+    // Usar el usuario root dentro del contenedor de desarrollo es estándar para instalar paquetes rápidos
+    "remoteUser": "root"
+}
