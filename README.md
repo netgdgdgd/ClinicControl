@@ -1,6 +1,6 @@
 # ClinicControl
 
-ClinicControl es una aplicacion clinica web completa dise�ada para ejecutarse con **MariaDB** y mensajeria en tiempo real. El sistema utiliza **ActiveMQ** y **STOMP** para el chat entre medicos y pacientes, y documenta sus APIs con **Swagger**.
+ClinicControl es una aplicacion clinica web completa diseñada para ejecutarse con **MariaDB** y mensajeria en tiempo real. El sistema utiliza **ActiveMQ** con protocolo **STOMP** para el chat entre medicos y pacientes, y documenta sus APIs con **Swagger**.
 
 ## Por que se usa STOMP TCP en este proyecto
 - STOMP TCP es el protocolo que usa el backend de Django para publicar mensajes directamente al broker **ActiveMQ**.
@@ -73,7 +73,7 @@ ACTIVEMQ_PORT=61613
 ```
 
 ## Docker Compose y MariaDB
-La aplicacion esta dise�ada para ejecutarse exclusivamente con MariaDB a traves de `docker-compose.yml`.
+La aplicacion esta diseñada para ejecutarse exclusivamente con MariaDB a traves de `docker-compose.yml`.
 El servicio `db` expone el puerto `3306` y el servicio `web` se conecta usando `DATABASE_URL`.
 
 ## Mensajeria en tiempo real
@@ -87,30 +87,6 @@ La documentacion de APIs esta disponible en:
 
 - `http://localhost:8000/api/docs/`
 
-## Despliegue en fly.dev
-Para desplegar en Fly, sigue estos pasos:
-
-1. Instala `flyctl`.
-2. Abre una terminal en `src`.
-3. Ejecuta:
-
-```bash
-fly launch --name cliniccontrol --dockerfile Dockerfile
-```
-
-4. Configura los secretos de Fly:
-
-```bash
-fly secrets set SECRET_KEY=... DATABASE_URL=... ACTIVEMQ_HOST=... ACTIVEMQ_PORT=61613
-```
-
-5. Despliega:
-
-```bash
-fly deploy
-```
-
-> Nota: en fly.dev se recomienda usar un servicio de base de datos MariaDB administrado y un broker STOMP/ActiveMQ externo, ya que `docker-compose` no se usa en producci�n Fly.
 
 ## Pruebas
 Ejecuta las pruebas del modulo de usuarios:
