@@ -34,7 +34,7 @@
 <script>
     // Conexión WebSocket al broker usando el mismo host del navegador
     var wsHost = window.location.hostname;
-    var client = Stomp.client('ws://' + wsHost + ':61614/stomp');
+    var client = Stomp.client('wss://' + wsHost + ':61614/stomp');
 
     client.connect('admin', 'admin', function() {
         // Suscribirse al tópico de la sala
