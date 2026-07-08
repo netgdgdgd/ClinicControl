@@ -2,7 +2,7 @@
     <div class="card-header bg-white">
         <strong>Consulta: Cita #{{ sala.cita.id }}</strong>
     </div>
-    <div class="card-body overflow-auto" style="height: 400px;">
+    <div id="scroll-container" class="card-body overflow-auto" style="height: 400px;">
         {% for mensaje in mensajes %}
             <div class="d-flex mb-3 {% if mensaje.remitente == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
                 <div class="p-2 rounded {% if mensaje.remitente == request.user %}bg-primary text-white{% else %}bg-light border{% endif %}">
@@ -21,7 +21,7 @@
     <div class="card-footer bg-white">
         <form hx-post="{% url 'chat_enviar_mensaje' sala.id %}" 
             hx-target="#main-chat-container" 
-            hx-swap="innerHTML"
+            hx-swap="innerHTML scroll:#scroll-container:bottom"
             class="input-group">
             {% csrf_token %}
             <input type="text" name="contenido" class="form-control" placeholder="Escribe un mensaje..." required>
@@ -30,27 +30,55 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script>
-    // Conexión WebSocket al broker usando el mismo host del navegador
-    var wsHost = window.location.hostname;
-    var client = Stomp.client('ws://' + wsHost + ':61614/stomp');
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.type = 'text/javascript';
 
-    client.connect('admin', 'admin', function() {
-        // Suscribirse al tópico de la sala
-        client.subscribe('/topic/chat.{{ sala.id }}', function(message) {
-            var data = JSON.parse(message.body);
+            // Resolve the promise once the script finishes loading
+            script.onload = () => resolve(src);
+            
+            // Reject the promise if loading fails
+            script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
 
-            // Actualizar la UI sin recargar
-            var chatBox = document.querySelector('.card-body');
-            chatBox.innerHTML += `
-                <div class="d-flex justify-content-start mb-3">
-                    <div class="p-2 rounded bg-light border">
-                        <strong>${data.remitente}:</strong> ${data.contenido}
-                        <small class="d-block text-muted" style="font-size: 0.7em;">${data.fecha}</small>
-                    </div>
-                </div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+            document.head.appendChild(script);
         });
-    });
+    }
+
+    async function iniciarApp() {
+        try {
+            // 1. Wait completely for the first script to load
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js');
+
+            var wsHost = window.location.hostname.replace('8000', '61614');
+            if (window.client !== undefined) {return}
+            window.client = Stomp.client('wss://' + wsHost);
+
+            client.connect('cliniccontrolmqadmin', '6o8IUYFTm7sMRFnqJDBjitPL22wUVZ/r', function() {
+                // Suscribirse al tópico de la sala
+                client.subscribe('/topic/chat.{{ sala.id }}', function(message) {
+                    var data = JSON.parse(message.body);
+
+                    // Actualizar la UI sin recargar
+                    var chatBox = document.querySelector('.card-body');
+                    chatBox.innerHTML += `
+                        <div class="d-flex justify-content-start mb-3">
+                            <div class="p-2 rounded bg-light border">
+                                <strong>${data.remitente}:</strong> ${data.contenido}
+                                <small class="d-block text-muted" style="font-size: 0.7em;">${data.fecha}</small>
+                            </div>
+                        </div>`;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    iniciarApp();
+    var scrollContainer = document.getElementById('scroll-container');
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
 </script>
